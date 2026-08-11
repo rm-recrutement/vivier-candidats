@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Passeport saisonnier — Loire-Atlantique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --marine-deep:#0E2A3D;
+    --marine:#15405A;
+    --sable:#F6F0E1;
+    --sable-2:#EBDFC3;
+    --paper:#FCFAF3;
+    --coral:#E4552B;
+    --coral-dark:#C2431E;
+    --gold:#E3AE45;
+    --seafoam:#3E9188;
+    --ink:#12232F;
+    --ink-soft:#5A6C74;
+    --line:rgba(14,42,61,0.15);
+    --white:#FFFFFF;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Manrope', sans-serif;
+    background:var(--sable);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:720px;margin:0 auto;min-height:100vh;position:relative;}
+
+  /* ============ HERO — carte postale ============ */
+  .hero{
+    background:
+      radial-gradient(circle at 88% -10%, rgba(227,174,69,0.25), transparent 45%),
+      linear-gradient(160deg, var(--marine-deep) 0%, var(--marine) 100%);
+    color:var(--sable);
+    padding:34px 24px 56px;
+    position:relative;
+    overflow:hidden;
+  }
+  .postmark{
+    position:absolute;
+    top:22px; right:20px;
+    width:88px;height:88px;
+    border:1.5px dashed rgba(246,240,225,0.55);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(-9deg);
+  }
+  .postmark span{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9px;
+    letter-spacing:0.08em;
+    text-align:center;
+    line-height:1.5;
+    color:rgba(246,240,225,0.75);
+    text-transform:uppercase;
+  }
+  .hero-eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin:0 0 12px;
+  }
+  .hero h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:clamp(30px,8vw,42px);
+    line-height:1.05;
+    margin:0 0 12px;
+    letter-spacing:-0.01em;
+    max-width:11ch;
+  }
+  .hero h1 em{
+    font-style:italic;
+    font-weight:500;
+    color:var(--gold);
+  }
+  .hero p{
+    margin:0;
+    font-size:15px;
+    color:#C9D8DD;
+    max-width:42ch;
+    line-height:1.55;
+  }
+  .tide{position:absolute;left:0;right:0;bottom:-1px;height:30px;}
+  .tide svg{width:100%;height:100%;display:block;}
+
+  /* ============ STAMP PROGRESS ============ */
+  .stamps{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:22px 20px 6px;
+  }
+  .stamp{
+    width:38px;height:38px;
+    border-radius:50%;
+    border:2px dashed var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    background:var(--paper);
+    flex-shrink:0;
+    transition:all 0.25s ease;
+  }
+  .stamp.active{
+    border-style:solid;
+    border-color:var(--coral);
+    color:var(--coral);
+    transform:rotate(-6deg) scale(1.08);
+  }
+  .stamp.done{
+    border-style:solid;
+    border-color:var(--seafoam);
+    background:var(--seafoam);
+    color:var(--white);
+    transform:rotate(4deg);
+  }
+  .stamp-link{flex:1;height:1.5px;background:var(--line);max-width:26px;}
+  .step-label{
+    text-align:center;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin:8px 0 0;
+  }
+
+  /* ============ FORM ============ */
+  .form-wrap{padding:14px 20px 60px;}
+  .card{
+    background:var(--paper);
+    border-radius:var(--radius);
+    border:1px solid var(--line);
+    padding:24px;
+    margin-bottom:16px;
+  }
+  .step{display:none;animation:fadeSlide 0.32s ease;}
+  .step.active{display:block;}
+  @keyframes fadeSlide{
+    from{opacity:0;transform:translateY(10px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  .step-title{
+    font-family:'Fraunces', serif;
+    font-size:21px;
+    font-weight:600;
+    margin:0 0 4px;
+  }
+  .step-sub{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 20px;
+  }
+  label.field-label{
+    display:block;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:6px;
+    color:var(--ink);
+  }
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  input[type=text], input[type=tel], input[type=email], input[type=date], textarea, select{
+    width:100%;
+    font-family:'Manrope', sans-serif;
+    font-size:15px;
+    padding:12px 13px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:var(--white);
+    color:var(--ink);
+    margin-bottom:14px;
+  }
+  input:focus, textarea:focus, select:focus{
+    outline:2px solid var(--coral);
+    outline-offset:1px;
+    border-color:var(--coral);
+  }
+  textarea{resize:vertical;min-height:60px;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+  .chip{position:relative;}
+  .chip input{position:absolute;opacity:0;width:1px;height:1px;}
+  .chip label{
+    display:inline-flex;
+    align-items:center;
+    padding:10px 15px;
+    border-radius:100px;
+    border:1.5px solid var(--line);
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    user-select:none;
+    background:var(--white);
+    transition:all 0.15s ease;
+  }
+  .chip input:checked + label{
+    background:var(--marine-deep);
+    border-color:var(--marine-deep);
+    color:var(--sable);
+  }
+  .segmented{display:flex;border-radius:10px;overflow:hidden;border:1.5px solid var(--line);margin-bottom:6px;}
+  .segmented button{
+    flex:1;
+    padding:12px;
+    border:none;
+    background:var(--white);
+    font-family:'Manrope', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .segmented button.selected{background:var(--marine-deep);color:var(--sable);}
+  .segmented button:not(:last-child){border-right:1.5px solid var(--line);}
+  .minor-note{
+    display:none;
+    font-size:12px;
+    color:var(--coral-dark);
+    background:#FCEBE4;
+    border-radius:8px;
+    padding:10px 12px;
+    margin:-4px 0 16px;
+  }
+  .minor-note.show{display:block;}
+
+  .period-row{
+    display:grid;
+    grid-template-columns:1fr 1fr auto;
+    gap:10px;
+    align-items:start;
+  }
+  .period-row input{margin-bottom:8px;}
+  .period-remove{
+    height:44px;width:44px;
+    border-radius:9px;
+    border:1.5px solid var(--line);
+    background:var(--white);
+    color:var(--ink-soft);
+    font-size:16px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .add-period{
+    background:none;
+    border:1.5px dashed var(--line);
+    color:var(--ink-soft);
+    font-weight:700;
+    font-size:13px;
+    padding:11px;
+    border-radius:9px;
+    width:100%;
+    cursor:pointer;
+    margin:2px 0 16px;
+  }
+  .add-period:hover{border-color:var(--coral);color:var(--coral);}
+
+  .nav-row{display:flex;gap:10px;margin-top:6px;}
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    flex:1;
+    padding:15px 20px;
+    border-radius:10px;
+    border:none;
+    background:var(--coral);
+    color:var(--white);
+    font-family:'Manrope', sans-serif;
+    font-weight:800;
+    font-size:15.5px;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  .btn:hover{background:var(--coral-dark);}
+  .btn:disabled{background:#D6C9AA;cursor:not-allowed;}
+  .btn-ghost{
+    background:transparent;
+    color:var(--marine-deep);
+    border:1.5px solid var(--line);
+    font-weight:700;
+    flex:0 0 auto;
+    padding-left:20px;padding-right:20px;
+  }
+  .btn-ghost:hover{background:var(--white);}
+
+  .recap{
+    background:var(--white);
+    border:1.5px dashed var(--line);
+    border-radius:12px;
+    padding:16px;
+    margin-bottom:16px;
+    font-size:13.5px;
+  }
+  .recap dt{font-weight:700;color:var(--ink-soft);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;font-family:'IBM Plex Mono',monospace;margin-top:10px;}
+  .recap dt:first-child{margin-top:0;}
+  .recap dd{margin:2px 0 0;}
+
+  .consent{
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    line-height:1.5;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+    margin-bottom:16px;
+  }
+  .consent input{margin-top:3px;flex-shrink:0;}
+
+  .success{display:none;text-align:center;padding:50px 24px;}
+  .success.show{display:block;}
+  .success .mark{
+    width:64px;height:64px;border-radius:50%;
+    background:var(--seafoam);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 18px;
+    color:white;font-size:28px;
+    transform:rotate(-6deg);
+  }
+  .success h2{font-family:'Fraunces', serif;font-size:26px;margin:0 0 8px;}
+  .success p{color:var(--ink-soft);font-size:14px;line-height:1.5;margin:0 auto 22px;max-width:34ch;}
+
+  .footer-link{text-align:center;padding:16px 0 40px;}
+  .footer-link button{
+    background:none;border:none;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;letter-spacing:0.08em;
+    color:var(--ink-soft);opacity:0.5;cursor:pointer;text-transform:uppercase;
+  }
+
+  /* ============ ADMIN ============ */
+  .hidden{display:none !important;}
+  .admin-top{
+    background:var(--marine-deep);color:var(--sable);
+    padding:20px 20px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  }
+  .admin-top h2{font-family:'Fraunces',serif;font-size:20px;margin:0;}
+  .admin-top .count{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--gold);}
+  .pin-gate{padding:60px 24px;text-align:center;}
+  .pin-gate input{max-width:220px;margin:14px auto 8px;text-align:center;letter-spacing:0.3em;font-family:'IBM Plex Mono',monospace;}
+  .filters{padding:16px 20px;display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--line);background:var(--paper);}
+  .filters select, .filters input{margin:0;width:auto;font-size:13px;padding:8px 10px;}
+  .filters input[type=text]{flex:1;min-width:140px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{
+    text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10.5px;
+    letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-soft);
+    padding:10px 14px;border-bottom:1.5px solid var(--line);
+    position:sticky;top:0;background:var(--sable);
+  }
+  td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .table-scroll{overflow-x:auto;max-height:70vh;overflow-y:auto;}
+  .tag{display:inline-block;background:var(--sable-2);color:var(--marine-deep);border-radius:100px;padding:2px 9px;font-size:11px;font-weight:700;margin:1px 3px 1px 0;}
+  .tag.minor{background:#FCEBE4;color:var(--coral-dark);}
+  .empty-state{padding:60px 24px;text-align:center;color:var(--ink-soft);}
+  .admin-actions{padding:14px 20px;display:flex;gap:10px;flex-wrap:wrap;}
+  .admin-actions .btn, .admin-actions .btn-ghost{flex:0 0 auto;width:auto;padding:10px 16px;font-size:13px;}
+  .loading{padding:60px 24px;text-align:center;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace;font-size:12px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ CANDIDATE VIEW ============ -->
+  <div id="candidateView">
+    <div class="hero">
+      <div class="postmark"><span>LOIRE<br>ATLANTIQUE<br>SAISON</span></div>
+      <p class="hero-eyebrow">Ton passeport saisonnier</p>
+      <h1>Cet été, <em>ce sera toi</em>&nbsp;?</h1>
+      <p>4 étapes, 2 minutes. Dépose ton profil, on te recontacte dès qu'un poste te correspond.</p>
+      <div class="tide">
+        <svg viewBox="0 0 400 40" preserveAspectRatio="none">
+          <path d="M0,20 Q25,5 50,20 T100,20 T150,20 T200,20 T250,20 T300,20 T350,20 T400,20 V40 H0 Z" fill="#F6F0E1"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="stamps" id="stampRow"></div>
+    <p class="step-label" id="stepLabel">Étape 1 · Toi</p>
+
+    <div class="form-wrap">
+      <form id="candidateForm">
+        <div class="card">
+
+          <!-- STEP 1 -->
+          <div class="step active" data-step="1">
+            <p class="step-title">C'est parti</p>
+            <p class="step-sub">Pour qu'on puisse te recontacter.</p>
+            <div class="row">
+              <div><label class="field-label">Prénom</label><input type="text" id="prenom" required></div>
+              <div><label class="field-label">Nom</label><input type="text" id="nom" required></div>
+            </div>
+            <label class="field-label">Téléphone</label>
+            <input type="tel" id="telephone" placeholder="06 12 34 56 78" required>
+            <label class="field-label">Email <span style="font-weight:500;color:var(--ink-soft)">(optionnel)</span></label>
+            <input type="email" id="email" placeholder="prenom@email.fr">
+
+            <label class="field-label">Es-tu majeur(e) ?</label>
+            <div class="segmented" id="majeurToggle">
+              <button type="button" data-val="oui">Oui</button>
+              <button type="button" data-val="non">Non</button>
+            </div>
+            <p class="minor-note" id="minorNote">Pas de souci — une autorisation de travail signée par un parent te sera simplement demandée. On t'envoie les infos par SMS si un poste correspond.</p>
+
+            <div class="nav-row"><button type="button" class="btn" onclick="goStep(2)">Continuer</button></div>
+          </div>
+
+          <!-- STEP 2 -->
+          <div class="step" data-step="2">
+            <p class="step-title">Ce que tu cherches</p>
+            <p class="step-sub">Coche tout ce qui t'intéresse.</p>
+            <label class="field-label">Secteur(s)</label>
+            <div class="chips" id="secteurChips">
+              <div class="chip"><input type="checkbox" id="s1" value="Restauration"><label for="s1">Restauration</label></div>
+              <div class="chip"><input type="checkbox" id="s2" value="Hôtellerie"><label for="s2">Hôtellerie</label></div>
+              <div class="chip"><input type="checkbox" id="s3" value="Accueil / Billetterie"><label for="s3">Accueil / Billetterie</label></div>
+              <div class="chip"><input type="checkbox" id="s4" value="Animation"><label for="s4">Animation</label></div>
+              <div class="chip"><input type="checkbox" id="s5" value="Vente / Boutique"><label for="s5">Vente / Boutique</label></div>
+              <div class="chip"><input type="checkbox" id="s6" value="Événementiel"><label for="s6">Événementiel</label></div>
+              <div class="chip"><input type="checkbox" id="s7" value="Autre"><label for="s7">Autre</label></div>
+            </div>
+            <label class="field-label">Type de contrat recherché</label>
+            <div class="chips" id="contratChips">
+              <div class="chip"><input type="checkbox" id="c1" value="CDD saisonnier"><label for="c1">CDD saisonnier</label></div>
+              <div class="chip"><input type="checkbox" id="c2" value="Extra / vacation"><label for="c2">Extra / vacation</label></div>
+              <div class="chip"><input type="checkbox" id="c3" value="Temps partiel"><label for="c3">Temps partiel</label></div>
+              <div class="chip"><input type="checkbox" id="c4" value="Stage / alternance"><label for="c4">Stage / alternance</label></div>
+              <div class="chip"><input type="checkbox" id="c5" value="CDI"><label for="c5">CDI</label></div>
+              <div class="chip"><input type="checkbox" id="c6" value="Autre"><label for="c6">Autre</label></div>
+            </div>
+            <div class="nav-row">
+              <button type="button" class="btn-ghost btn" onclick="goStep(1)">Retour</button>
+              <button type="button" class="btn" onclick="goStep(3)">Continuer</button>
+            </div>
+          </div>
+
+          <!-- STEP 3 -->
+          <div class="step" data-step="3">
+            <p class="step-title">Tes disponibilités</p>
+            <p class="step-sub">Par périodes séparées si besoin — ajoute-en autant que nécessaire.</p>
+            <div id="periodsWrap"></div>
+            <button type="button" class="add-period" onclick="addPeriod()">+ Ajouter une période</button>
+
+            <label class="field-label">Zone de mobilité</label>
+            <select id="mobilite">
+              <option value="">— Choisir —</option>
+              <option>Nantes et agglomération</option>
+              <option>Littoral (La Baule / Pornic)</option>
+              <option>Vignoble nantais</option>
+              <option>Toute la Loire-Atlantique</option>
+              <option>Je peux me loger sur place</option>
+            </select>
+
+            <label class="field-label">Une ligne sur ton expérience <span style="font-weight:500;color:var(--ink-soft)">(optionnel)</span></label>
+            <textarea id="experience" placeholder="Ex : 2 saisons en service, à l'aise avec le public..."></textarea>
+
+            <div class="nav-row">
+              <button type="button" class="btn-ghost btn" onclick="goStep(2)">Retour</button>
+              <button type="button" class="btn" onclick="goStep(4)">Continuer</button>
+            </div>
+          </div>
+
+          <!-- STEP 4 -->
+          <div class="step" data-step="4">
+            <p class="step-title">Dernier tampon</p>
+            <p class="step-sub">Vérifie, puis envoie.</p>
+            <dl class="recap" id="recapBox"></dl>
+
+            <div class="consent">
+              <input type="checkbox" id="consent" required>
+              <label for="consent">J'accepte que mes informations soient conservées pour être recontacté(e) au sujet d'offres d'emploi correspondant à mon profil. Ces données ne sont ni vendues ni partagées, et je peux demander leur suppression à tout moment auprès du recruteur.</label>
+            </div>
+
+            <input type="hidden" id="lieu">
+            <div class="nav-row">
+              <button type="button" class="btn-ghost btn" onclick="goStep(3)">Retour</button>
+              <button type="submit" class="btn" id="submitBtn">Envoyer ma candidature</button>
+            </div>
+          </div>
+
+        </div>
+      </form>
+
+      <div class="success" id="successMsg">
+        <div class="mark">✓</div>
+        <h2>Tampon validé.</h2>
+        <p>Ton profil est bien enregistré. On te recontacte par téléphone ou email dès qu'un poste correspond à ce que tu cherches.</p>
+        <button class="btn-ghost btn" style="flex:0 0 auto;" onclick="resetForm()">Envoyer une autre candidature</button>
+      </div>
+
+      <div class="footer-link"><button onclick="showAdminGate()">Espace recruteur</button></div>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN PIN GATE ============ -->
+  <div id="pinGate" class="hidden">
+    <div class="admin-top"><h2>Espace recruteur</h2></div>
+    <div class="pin-gate">
+      <p style="color:var(--ink-soft);font-size:14px;">Entre ton code d'accès</p>
+      <input type="text" id="pinInput" maxlength="6" placeholder="••••">
+      <div style="margin-top:14px;"><button class="btn" style="max-width:220px;margin:0 auto;" onclick="checkPin()">Accéder</button></div>
+      <p id="pinError" style="color:var(--coral);font-size:12px;margin-top:10px;display:none;">Code incorrect.</p>
+      <button class="footer-link" style="margin-top:20px;" onclick="backToCandidate()">← Retour au formulaire</button>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN DASHBOARD ============ -->
+  <div id="adminView" class="hidden">
+    <div class="admin-top"><h2>Vivier candidats</h2><span class="count" id="candidateCount">0 profil</span></div>
+    <div class="filters">
+      <input type="text" id="filterSearch" placeholder="Rechercher un nom...">
+      <select id="filterSecteur">
+        <option value="">Tous secteurs</option>
+        <option>Restauration</option><option>Hôtellerie</option><option>Accueil / Billetterie</option>
+        <option>Animation</option><option>Vente / Boutique</option><option>Événementiel</option><option>Autre</option>
+      </select>
+      <select id="filterContrat">
+        <option value="">Tous contrats</option>
+        <option>CDD saisonnier</option><option>Extra / vacation</option><option>Temps partiel</option>
+        <option>Stage / alternance</option><option>CDI</option><option>Autre</option>
+      </select>
+      <select id="filterMobilite">
+        <option value="">Toutes zones</option>
+        <option>Nantes et agglomération</option><option>Littoral (La Baule / Pornic)</option>
+        <option>Vignoble nantais</option><option>Toute la Loire-Atlantique</option><option>Je peux me loger sur place</option>
+      </select>
+      <select id="filterMajeur">
+        <option value="">Majeur & mineur</option>
+        <option value="oui">Majeurs uniquement</option>
+        <option value="non">Mineurs uniquement</option>
+      </select>
+    </div>
+    <div class="admin-actions">
+      <button class="btn-ghost" onclick="loadCandidates()">↻ Actualiser</button>
+      <button class="btn-ghost" onclick="exportCSV()">⬇ Exporter en CSV (Excel)</button>
+      <button class="btn-ghost" onclick="backToCandidate()">← Retour au formulaire</button>
+    </div>
+    <div id="tableWrap" class="table-scroll"><div class="loading">Chargement des candidatures...</div></div>
+  </div>
+
+</div>
+
+<script>
+const ADMIN_PIN = "2026"; // à personnaliser
+const TOTAL_STEPS = 4;
+let currentStep = 1;
+let periodCount = 0;
+let allCandidates = [];
+
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const lieu = params.get('lieu');
+  if(lieu){ document.getElementById('lieu').value = decodeURIComponent(lieu); }
+})();
+
+// ---------------- STAMP PROGRESS ----------------
+function renderStamps(){
+  const row = document.getElementById('stampRow');
+  row.innerHTML = '';
+  const labels = ['Toi','Recherche','Dispo','Envoi'];
+  for(let i=1;i<=TOTAL_STEPS;i++){
+    const s = document.createElement('div');
+    s.className = 'stamp' + (i < currentStep ? ' done' : (i === currentStep ? ' active' : ''));
+    s.textContent = i < currentStep ? '✓' : i;
+    row.appendChild(s);
+    if(i < TOTAL_STEPS){
+      const link = document.createElement('div');
+      link.className = 'stamp-link';
+      row.appendChild(link);
+    }
+  }
+  document.getElementById('stepLabel').textContent = 'Étape ' + currentStep + ' · ' + labels[currentStep-1];
+}
+
+function goStep(n){
+  if(n > currentStep && !validateStep(currentStep)) return;
+  currentStep = n;
+  document.querySelectorAll('.step').forEach(el => el.classList.toggle('active', Number(el.dataset.step) === n));
+  renderStamps();
+  if(n === TOTAL_STEPS){ renderRecap(); }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function validateStep(n){
+  if(n === 1){
+    const prenom = document.getElementById('prenom').value.trim();
+    const nom = document.getElementById('nom').value.trim();
+    const tel = document.getElementById('telephone').value.trim();
+    const majeur = document.getElementById('majeurToggle').dataset.value;
+    if(!prenom || !nom || !tel){ alert("Merci de renseigner ton prénom, ton nom et ton téléphone."); return false; }
+    if(!majeur){ alert("Merci d'indiquer si tu es majeur(e)."); return false; }
+    return true;
+  }
+  if(n === 2){
+    if(getChecked('secteurChips').length === 0){ alert("Choisis au moins un secteur."); return false; }
+    if(getChecked('contratChips').length === 0){ alert("Choisis au moins un type de contrat."); return false; }
+    return true;
+  }
+  if(n === 3){
+    if(getPeriods().length === 0){ alert("Ajoute au moins une période de disponibilité."); return false; }
+    if(!document.getElementById('mobilite').value){ alert("Merci d'indiquer ta zone de mobilité."); return false; }
+    return true;
+  }
+  return true;
+}
+
+function getChecked(containerId){
+  return Array.from(document.querySelectorAll('#'+containerId+' input:checked')).map(i => i.value);
+}
+
+// ---------------- MAJEUR TOGGLE ----------------
+document.getElementById('majeurToggle').addEventListener('click', function(e){
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  this.dataset.value = btn.dataset.val;
+  this.querySelectorAll('button').forEach(b => b.classList.toggle('selected', b === btn));
+  document.getElementById('minorNote').classList.toggle('show', btn.dataset.val === 'non');
+});
+
+// ---------------- PERIODS ----------------
+function addPeriod(){
+  periodCount++;
+  const id = 'period_' + periodCount;
+  const wrap = document.getElementById('periodsWrap');
+  const row = document.createElement('div');
+  row.className = 'period-row';
+  row.id = id;
+  row.innerHTML =
+    '<div><label class="field-label">Du</label><input type="date" class="period-start"></div>' +
+    '<div><label class="field-label">Au</label><input type="date" class="period-end"></div>' +
+    '<button type="button" class="period-remove" onclick="document.getElementById(\'' + id + '\').remove()" aria-label="Supprimer cette période">✕</button>';
+  wrap.appendChild(row);
+}
+function getPeriods(){
+  return Array.from(document.querySelectorAll('.period-row')).map(row => ({
+    debut: row.querySelector('.period-start').value,
+    fin: row.querySelector('.period-end').value
+  })).filter(p => p.debut || p.fin);
+}
+addPeriod(); // start with one period visible
+
+// ---------------- RECAP ----------------
+function renderRecap(){
+  const prenom = document.getElementById('prenom').value.trim();
+  const nom = document.getElementById('nom').value.trim();
+  const tel = document.getElementById('telephone').value.trim();
+  const majeur = document.getElementById('majeurToggle').dataset.value;
+  const secteurs = getChecked('secteurChips');
+  const contrats = getChecked('contratChips');
+  const periods = getPeriods();
+  const mobilite = document.getElementById('mobilite').value;
+
+  const box = document.getElementById('recapBox');
+  box.innerHTML =
+    '<dt>Candidat</dt><dd>' + escapeHtml(prenom + ' ' + nom) + ' — ' + escapeHtml(tel) + (majeur === 'non' ? ' · mineur(e)' : '') + '</dd>' +
+    '<dt>Secteurs</dt><dd>' + escapeHtml(secteurs.join(', ') || '—') + '</dd>' +
+    '<dt>Contrats recherchés</dt><dd>' + escapeHtml(contrats.join(', ') || '—') + '</dd>' +
+    '<dt>Disponibilités</dt><dd>' + (periods.map(p => formatDate(p.debut) + ' → ' + formatDate(p.fin)).join(' · ') || '—') + '</dd>' +
+    '<dt>Mobilité</dt><dd>' + escapeHtml(mobilite || '—') + '</dd>';
+}
+
+// ---------------- SUBMIT ----------------
+document.getElementById('candidateForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  if(!validateStep(1) || !validateStep(2) || !validateStep(3)) return;
+  if(!document.getElementById('consent').checked){ alert("Merci de cocher la case de consentement."); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = "Envoi en cours...";
+
+  const entry = {
+    prenom: document.getElementById('prenom').value.trim(),
+    nom: document.getElementById('nom').value.trim(),
+    telephone: document.getElementById('telephone').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    majeur: document.getElementById('majeurToggle').dataset.value,
+    secteurs: getChecked('secteurChips'),
+    contrats: getChecked('contratChips'),
+    periodes: getPeriods(),
+    mobilite: document.getElementById('mobilite').value,
+    experience: document.getElementById('experience').value.trim(),
+    lieu: document.getElementById('lieu').value || "Non renseigné",
+    dateEnvoi: new Date().toISOString()
+  };
+
+  const key = 'candidat:' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+
+  try{
+    const res = await window.storage.set(key, JSON.stringify(entry), true);
+    if(!res){ throw new Error("Échec de l'enregistrement"); }
+    document.getElementById('candidateForm').classList.add('hidden');
+    document.getElementById('stampRow').classList.add('hidden');
+    document.getElementById('stepLabel').classList.add('hidden');
+    document.getElementById('successMsg').classList.add('show');
+  }catch(err){
+    console.error(err);
+    alert("Une erreur est survenue. Réessaie dans quelques instants.");
+    btn.disabled = false;
+    btn.textContent = "Envoyer ma candidature";
+  }
+});
+
+function resetForm(){
+  document.getElementById('candidateForm').reset();
+  document.getElementById('candidateForm').classList.remove('hidden');
+  document.getElementById('stampRow').classList.remove('hidden');
+  document.getElementById('stepLabel').classList.remove('hidden');
+  document.getElementById('successMsg').classList.remove('show');
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('submitBtn').textContent = "Envoyer ma candidature";
+  document.getElementById('periodsWrap').innerHTML = '';
+  periodCount = 0;
+  addPeriod();
+  document.getElementById('majeurToggle').dataset.value = '';
+  document.getElementById('majeurToggle').querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+  document.getElementById('minorNote').classList.remove('show');
+  currentStep = 1;
+  goStep(1);
+}
+
+// ---------------- ADMIN ----------------
+function showAdminGate(){
+  document.getElementById('candidateView').classList.add('hidden');
+  document.getElementById('pinGate').classList.remove('hidden');
+}
+function backToCandidate(){
+  document.getElementById('adminView').classList.add('hidden');
+  document.getElementById('pinGate').classList.add('hidden');
+  document.getElementById('candidateView').classList.remove('hidden');
+}
+function checkPin(){
+  const val = document.getElementById('pinInput').value.trim();
+  if(val === ADMIN_PIN){
+    document.getElementById('pinGate').classList.add('hidden');
+    document.getElementById('adminView').classList.remove('hidden');
+    loadCandidates();
+  } else {
+    document.getElementById('pinError').style.display = 'block';
+  }
+}
+
+async function loadCandidates(){
+  const wrap = document.getElementById('tableWrap');
+  wrap.innerHTML = '<div class="loading">Chargement des candidatures...</div>';
+  try{
+    const listRes = await window.storage.list('candidat:', true);
+    const keys = (listRes && listRes.keys) ? listRes.keys : [];
+    const entries = [];
+    for(const k of keys){
+      try{
+        const r = await window.storage.get(k, true);
+        if(r && r.value){ entries.push(JSON.parse(r.value)); }
+      }catch(e){}
+    }
+    entries.sort((a,b) => new Date(b.dateEnvoi) - new Date(a.dateEnvoi));
+    allCandidates = entries;
+    renderTable();
+  }catch(err){
+    console.error(err);
+    wrap.innerHTML = '<div class="empty-state">Impossible de charger les candidatures pour le moment.</div>';
+  }
+}
+
+function renderTable(){
+  const search = document.getElementById('filterSearch').value.toLowerCase();
+  const secteur = document.getElementById('filterSecteur').value;
+  const contrat = document.getElementById('filterContrat').value;
+  const mobilite = document.getElementById('filterMobilite').value;
+  const majeur = document.getElementById('filterMajeur').value;
+
+  const filtered = allCandidates.filter(c => {
+    const nameMatch = (c.prenom + ' ' + c.nom).toLowerCase().includes(search);
+    const secteurMatch = !secteur || (c.secteurs || []).includes(secteur);
+    const contratMatch = !contrat || (c.contrats || []).includes(contrat);
+    const mobiliteMatch = !mobilite || c.mobilite === mobilite;
+    const majeurMatch = !majeur || c.majeur === majeur;
+    return nameMatch && secteurMatch && contratMatch && mobiliteMatch && majeurMatch;
+  });
+
+  document.getElementById('candidateCount').textContent = filtered.length + ' profil' + (filtered.length > 1 ? 's' : '') + ' (' + allCandidates.length + ' au total)';
+
+  const wrap = document.getElementById('tableWrap');
+  if(filtered.length === 0){
+    wrap.innerHTML = '<div class="empty-state">Aucun profil ne correspond à ces filtres pour le moment.</div>';
+    return;
+  }
+
+  let html = '<table><thead><tr>' +
+    '<th>Candidat</th><th>Contact</th><th>Secteurs</th><th>Contrats</th><th>Disponibilités</th><th>Mobilité</th><th>Lieu</th><th>Reçu le</th>' +
+    '</tr></thead><tbody>';
+
+  filtered.forEach(c => {
+    const secteursHtml = (c.secteurs || []).map(s => '<span class="tag">'+escapeHtml(s)+'</span>').join('');
+    const contratsHtml = (c.contrats || []).map(s => '<span class="tag">'+escapeHtml(s)+'</span>').join('');
+    const periodesTxt = (c.periodes || []).map(p => formatDate(p.debut) + '→' + formatDate(p.fin)).join(' · ') || '—';
+    const contact = escapeHtml(c.telephone) + (c.email ? '<br><span style="color:var(--ink-soft)">'+escapeHtml(c.email)+'</span>' : '');
+    const nameLine = escapeHtml(c.prenom)+' '+escapeHtml(c.nom) + (c.majeur === 'non' ? ' <span class="tag minor">mineur(e)</span>' : '');
+    html += '<tr>' +
+      '<td><strong>'+nameLine+'</strong>'+(c.experience ? '<br><span style="color:var(--ink-soft);font-size:12px;">'+escapeHtml(c.experience)+'</span>' : '')+'</td>' +
+      '<td>'+contact+'</td>' +
+      '<td>'+secteursHtml+'</td>' +
+      '<td>'+contratsHtml+'</td>' +
+      '<td>'+periodesTxt+'</td>' +
+      '<td>'+escapeHtml(c.mobilite || '—')+'</td>' +
+      '<td>'+escapeHtml(c.lieu || '—')+'</td>' +
+      '<td style="white-space:nowrap;color:var(--ink-soft);">'+formatDate(c.dateEnvoi)+'</td>' +
+      '</tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+['filterSearch','filterSecteur','filterContrat','filterMobilite','filterMajeur'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderTable);
+  document.getElementById(id).addEventListener('change', renderTable);
+});
+
+function formatDate(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString('fr-FR', {day:'2-digit', month:'2-digit', year:'numeric'});
+}
+function escapeHtml(str){
+  if(!str) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function exportCSV(){
+  const search = document.getElementById('filterSearch').value.toLowerCase();
+  const secteur = document.getElementById('filterSecteur').value;
+  const contrat = document.getElementById('filterContrat').value;
+  const mobilite = document.getElementById('filterMobilite').value;
+  const majeur = document.getElementById('filterMajeur').value;
+  const filtered = allCandidates.filter(c => {
+    const nameMatch = (c.prenom + ' ' + c.nom).toLowerCase().includes(search);
+    const secteurMatch = !secteur || (c.secteurs || []).includes(secteur);
+    const contratMatch = !contrat || (c.contrats || []).includes(contrat);
+    const mobiliteMatch = !mobilite || c.mobilite === mobilite;
+    const majeurMatch = !majeur || c.majeur === majeur;
+    return nameMatch && secteurMatch && contratMatch && mobiliteMatch && majeurMatch;
+  });
+
+  const headers = ['Prénom','Nom','Téléphone','Email','Majeur','Secteurs','Contrats recherchés','Périodes de disponibilité','Mobilité','Expérience','Lieu de collecte','Date de réception'];
+  const rows = filtered.map(c => [
+    c.prenom, c.nom, c.telephone, c.email || '',
+    c.majeur === 'non' ? 'Mineur(e)' : 'Majeur(e)',
+    (c.secteurs || []).join(' / '),
+    (c.contrats || []).join(' / '),
+    (c.periodes || []).map(p => formatDate(p.debut) + '→' + formatDate(p.fin)).join(' | '),
+    c.mobilite || '', c.experience || '', c.lieu || '',
+    formatDate(c.dateEnvoi)
+  ]);
+
+  let csv = headers.join(';') + '\n';
+  rows.forEach(r => { csv += r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(';') + '\n'; });
+
+  const blob = new Blob(['\uFEFF' + csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'vivier-candidats-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+renderStamps();
+</script>
+</body>
+</html>
